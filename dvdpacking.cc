@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
 
     Items  items;
     int  a = optind;
+    bool  allok = true;
     while (a < argc)
     {
         try
@@ -168,9 +169,15 @@ int main(int argc, char* argv[])
         catch (const std::exception& ex)
         {
             LOG_ERR("failed to examine: " << ex.what());
+            allok = false;
         }
 
         ++a;
+    }
+
+    if (!allok) {
+        LOG_ERR("failed to process all requested inputs");
+        return 2;
     }
 
     LOG_INFO("ttl items=" << items.count() << "  ttl size=" << items.size() << " (" << _humansizes(items.size()) << ")" << "  lower bounds=" << ceil((double)items.size()/(double)capacity));
