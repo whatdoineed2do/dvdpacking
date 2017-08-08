@@ -235,5 +235,11 @@ int main(int argc, char* argv[])
     }
 
 
+    pp = bps;
+    while (*pp) {
+        delete *pp;
+        *pp++ = NULL;
+    }
+
     return 0;
 }
