@@ -16,10 +16,29 @@
 
 const char*  argv0 = NULL;
 
+const double  GIGABYTE = 1073741824.0;
+const double  MEGABYTE = 1048576.0;
+
+
+std::string _humansizes(off_t  size_)
+{
+    std::ostringstream  os;
+    os << std::setprecision(4);
+    if (size_ >= GIGABYTE) {
+        os << (double)size_/GIGABYTE << "GiB";
+    }
+    else {
+        os << (double)size_/MEGABYTE << "MiB";
+    }
+    return os.str();
+}
 
 void  _usage()
 {
-    LOG_INFO("usage");
+    LOG_INFO("usage: " << argv0);
+    LOG_INFO("       -c <capacity>    - value in bytes of i\"dvd\" or \"cd\"");
+    LOG_INFO("      [-p <algo>]       - packing algorithm: \"firstfit\" \"worstfit\" \"all\":  default=\"all\"");
+    LOG_INFO("      [-r <reserve>]    - reserve number of bytes or % of capacity:  default=0");
     exit(1);
 }
 
@@ -28,6 +47,7 @@ int main(int argc, char* argv[])
     const off_t  DVD_MAX = 4707319808;
     const off_t  CD_MAX  =     737280;
     off_t  capacity = DVD_MAX;
+    long  reserve = 0;
 
     argv0 = basename(argv[0]);
 
@@ -41,7 +61,7 @@ int main(int argc, char* argv[])
     Packer*  bp = NULL;
 
     int c;
-    while ( (c=getopt(argc, argv, "p:r:c:")) != EOF) {
+    while ( (c=getopt(argc, argv, "p:r:c:h")) != EOF) {
         switch (c)
         {
             case 'c':
@@ -84,8 +104,51 @@ int main(int argc, char* argv[])
                 if (strcasecmp(optarg, "worstfitdesc") == 0)  bp = bps[3];
             } break;
 
-            case 'r':  break;
+            case 'r':
+            {
+                char*  ep = NULL;
+                long  val = strtol(optarg, &ep, 10);
+                if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN)) || (errno != 0 && val == 0)) {
+                    LOG_ERR("unhandled reserve arg - '" << optarg << "' - " << strerror(errno));
+                }
+                else
+                {
+                    if (ep == optarg) {
+                        LOG_ERR("invalid reserve arg - '" << optarg << "'");
+                    }
+                    else 
+                    {
+                        if (*ep != NULL) {
+                            if (strcmp(ep, "%") == 0) {
+                                reserve = -1*val;
+                            }
+                            else {
+                                LOG_ERR("chars included in capacity arg - '" << optarg << "'");
+                            }
+                        }
+                        else
+                        {
+                            reserve = val;
+                        }
+                    }
+                }
+            } break;
+
+            case 'h':
+            default:
+                _usage();
         }
+    }
+
+    if (reserve < 0) {
+        // calc % of capacity
+        reserve = ((double)reserve/100.0)*capacity*-1.0;
+    }
+
+    capacity -= reserve;
+    if (capacity <= 0) {
+        LOG_ERR("capacity/reserve values invalid");
+        _usage();
     }
 
     if (optind == argc) {
@@ -110,7 +173,7 @@ int main(int argc, char* argv[])
         ++a;
     }
 
-    LOG_INFO("ttl items=" << items.count() << "  ttl size=" << items.size() << "  lower bounds=" << ceil((double)items.size()/(double)capacity));
+    LOG_INFO("ttl items=" << items.count() << "  ttl size=" << items.size() << " (" << _humansizes(items.size()) << ")" << "  lower bounds=" << ceil((double)items.size()/(double)capacity));
     for (Items::const_iterator i=items.begin(); i!=items.end(); ++i) {
         LOG_INFO("  " << std::setw(10) << i->size() << "  " << i->what());
     }
@@ -138,7 +201,7 @@ int main(int argc, char* argv[])
 
             unsigned  i = 0;
             for (Bins::const_iterator  b=bins.begin(); b!=bins.end(); ++b, ++i) {
-                LOG_INFO("  bin# " << i << "  size=" << b->size() << " remain=" << b->remain() << " {");
+                LOG_INFO("  bin# " << i << "  size=" << b->size() << " (" << _humansizes(b->size()) << ") " << " remain=" << b->remain() << " (" << _humansizes(b->remain()) << ") " << " {");
                 for (Items::const_iterator j=b->items().begin(); j!=b->items().end(); ++j) {
                     LOG_INFO("    \"" << j->what() << "\"");
                 }
