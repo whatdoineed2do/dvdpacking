@@ -68,4 +68,23 @@ struct PackWorstFitDesc : public PackWorstFit
 };
 
 
+class PackBestFit : public Packer
+{
+  public:
+    PackBestFit() : Packer("Best Fit")  { }
+    virtual ~PackBestFit() { }
+    virtual Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
+
+  protected:
+    PackBestFit(const char* n_) : Packer(n_) { }
+};
+
+struct PackBestFitDesc : public PackBestFit
+{
+    PackBestFitDesc() : PackBestFit("Best Fit Descending")  { }
+    ~PackBestFitDesc() { }
+    Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
+};
+
+
 #endif
