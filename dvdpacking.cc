@@ -37,7 +37,7 @@ void  _usage()
 {
     LOG_INFO("usage: " << argv0);
     LOG_INFO("       -c <capacity>    - value in bytes of i\"dvd\" or \"cd\"");
-    LOG_INFO("      [-p <algo>]       - packing algorithm: \"firstfit\" \"worstfit\" \"all\":  default=\"all\"");
+    LOG_INFO("      [-p <algo>]       - packing algorithm: \"firstfit{desc}\" \"worstfit{desc}\" \"bestfit{desc}\" \"all\":  default=\"all\"");
     LOG_INFO("      [-r <reserve>]    - reserve number of bytes or % of capacity:  default=0");
     exit(1);
 }
@@ -56,6 +56,8 @@ int main(int argc, char* argv[])
         new PackFirstFirtDesc(),
         new PackWorstFit(),
         new PackWorstFitDesc(),
+        new PackBestFit(),
+        new PackBestFitDesc(),
         NULL
     };
     Packer*  bp = NULL;
@@ -185,6 +187,8 @@ int main(int argc, char* argv[])
         LOG_INFO("  " << std::setw(10) << i->size() << "  " << i->what());
     }
 
+    
+    std::list<std::pair<unsigned, std::string> >  summaries;
     /* work through all the packing algos til we find the selected one .. if not
      * selected, it'll try them all
      */
@@ -198,6 +202,9 @@ int main(int argc, char* argv[])
 
             LOG_INFO("---");
             LOG_INFO(p->name() << " #bins=" << bins.count() << "  #unhandled=" << unhandled.count() << " size=" << unhandled.size() << " (" << _humansizes(unhandled.size()) << ")");
+
+            summaries.push_back(std::make_pair(bins.count(), p->name()));
+
             if (!unhandled.empty()) {
                 LOG_WARN("unhandled items = {");
                 for (Items::const_iterator i=unhandled.begin(); i!=unhandled.end(); ++i) {
@@ -216,6 +223,15 @@ int main(int argc, char* argv[])
             }
         }
         ++pp;
+    }
+    
+    if (summaries.size() > 1) {
+        LOG_INFO("------");
+        LOG_INFO("summary:");
+        summaries.sort();
+        for (std::list< std::pair<unsigned, std::string> >::const_iterator s=summaries.begin(); s!=summaries.end(); ++s) {
+            LOG_INFO("    bins=" << std::setw(2) << s->first << "  " << s->second.c_str());
+        }
     }
 
 
