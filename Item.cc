@@ -20,7 +20,7 @@ Item::Item(const char* what_)  throw (std::invalid_argument, std::underflow_erro
     }
 
     struct stat  st;
-    if (lstat(_what.c_str(), &st)) {
+    if (stat(_what.c_str(), &st)) {
         std::ostringstream  err;
         err << "failed to open '" << _what << "' - " << strerror(errno);
         throw std::underflow_error(err.str());
