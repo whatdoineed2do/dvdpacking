@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
             items.push_back(argv[a]);
             LOG_DEBUG(items.back().what() << ": " << items.back().size());
         }
-        catch (std::exception ex)
+        catch (const std::exception& ex)
         {
             LOG_ERR("failed to examine: " << ex.what());
         }
