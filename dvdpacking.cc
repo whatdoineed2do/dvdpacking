@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
             Bins  bins = p->pack(items, capacity, unhandled);
 
             LOG_INFO("---");
-            LOG_INFO(p->name() << " #bins=" << bins.count() << "  #unhandled=" << unhandled.count() << " size=" << unhandled.size());
+            LOG_INFO(p->name() << " #bins=" << bins.count() << "  #unhandled=" << unhandled.count() << " size=" << unhandled.size() << " (" << _humansizes(unhandled.size()) << ")");
             if (!unhandled.empty()) {
                 LOG_WARN("unhandled items = {");
                 for (Items::const_iterator i=unhandled.begin(); i!=unhandled.end(); ++i) {
