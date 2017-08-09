@@ -51,13 +51,22 @@ int main(int argc, char* argv[])
 
     argv0 = basename(argv[0]);
 
+    struct {
+        PackFirstFit       ff;
+        PackFirstFirtDesc  ffd;
+        PackWorstFit       wf;
+        PackWorstFitDesc   wfd;
+        PackBestFit        bf;
+        PackBestFitDesc    bfd;
+    } allbps;
+ 
     Packer*  bps[] = {
-        new PackFirstFit(),
-        new PackFirstFirtDesc(),
-        new PackWorstFit(),
-        new PackWorstFitDesc(),
-        new PackBestFit(),
-        new PackBestFitDesc(),
+        &allbps.ff,
+        &allbps.ffd,
+        &allbps.wf,
+        &allbps.wfd,
+        &allbps.bf,
+        &allbps.bfd,
         NULL
     };
     Packer*  bp = NULL;
@@ -104,6 +113,8 @@ int main(int argc, char* argv[])
                 if (strcasecmp(optarg, "firstfitdesc") == 0)  bp = bps[1];
                 if (strcasecmp(optarg, "worstfit")     == 0)  bp = bps[2];
                 if (strcasecmp(optarg, "worstfitdesc") == 0)  bp = bps[3];
+                if (strcasecmp(optarg, "bestfit")      == 0)  bp = bps[4];
+                if (strcasecmp(optarg, "bestfitdesc")  == 0)  bp = bps[5];
             } break;
 
             case 'r':
@@ -232,13 +243,6 @@ int main(int argc, char* argv[])
         for (std::list< std::pair<unsigned, std::string> >::const_iterator s=summaries.begin(); s!=summaries.end(); ++s) {
             LOG_INFO("    bins=" << std::setw(2) << s->first << "  " << s->second.c_str());
         }
-    }
-
-
-    pp = bps;
-    while (*pp) {
-        delete *pp;
-        *pp++ = NULL;
     }
 
     return 0;
