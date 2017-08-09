@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <unistd.h>
 #include <limits.h>
 #include <libgen.h>
@@ -39,6 +40,7 @@ void  _usage()
     LOG_INFO("       -c <capacity>    - value in bytes of i\"dvd\" or \"cd\"");
     LOG_INFO("      [-p <algo>]       - packing algorithm: \"firstfit{desc}\" \"worstfit{desc}\" \"bestfit{desc}\" \"all\":  default=\"all\"");
     LOG_INFO("      [-r <reserve>]    - reserve number of bytes or % of capacity:  default=0");
+    LOG_INFO("      [-o <output base>]- create dirs representing each packing algorithm and symlinks to the bin contents");
     exit(1);
 }
 
@@ -48,6 +50,7 @@ int main(int argc, char* argv[])
     const off_t  CD_MAX  =     737280;
     off_t  capacity = DVD_MAX;
     long  reserve = 0;
+    char*  output = NULL;
 
     argv0 = basename(argv[0]);
 
@@ -72,7 +75,7 @@ int main(int argc, char* argv[])
     Packer*  bp = NULL;
 
     int c;
-    while ( (c=getopt(argc, argv, "p:r:c:h")) != EOF) {
+    while ( (c=getopt(argc, argv, "p:r:c:o:h")) != EOF) {
         switch (c)
         {
             case 'c':
@@ -109,11 +112,11 @@ int main(int argc, char* argv[])
 
             case 'p':
             {
-                if (strcasecmp(optarg, "firstfit")     == 0)  bp = bps[0];
-                if (strcasecmp(optarg, "firstfitdesc") == 0)  bp = bps[1];
-                if (strcasecmp(optarg, "worstfit")     == 0)  bp = bps[2];
-                if (strcasecmp(optarg, "worstfitdesc") == 0)  bp = bps[3];
-                if (strcasecmp(optarg, "bestfit")      == 0)  bp = bps[4];
+                if (strcasecmp(optarg, "firstfit")     == 0)  bp = bps[0];  else
+                if (strcasecmp(optarg, "firstfitdesc") == 0)  bp = bps[1];  else
+                if (strcasecmp(optarg, "worstfit")     == 0)  bp = bps[2];  else
+                if (strcasecmp(optarg, "worstfitdesc") == 0)  bp = bps[3];  else
+                if (strcasecmp(optarg, "bestfit")      == 0)  bp = bps[4];  else
                 if (strcasecmp(optarg, "bestfitdesc")  == 0)  bp = bps[5];
             } break;
 
@@ -136,7 +139,7 @@ int main(int argc, char* argv[])
                                 reserve = -1*val;
                             }
                             else {
-                                LOG_ERR("chars included in capacity arg - '" << optarg << "'");
+                                LOG_ERR("chars included in reserve arg - '" << optarg << "'");
                             }
                         }
                         else
@@ -147,9 +150,27 @@ int main(int argc, char* argv[])
                 }
             } break;
 
+            case 'o':
+                output = optarg;
+            break;
+
             case 'h':
             default:
                 _usage();
+        }
+    }
+
+    if (output)
+    {
+        if (access(output, W_OK) < 0) {
+            LOG_ERR("invalid output location: '" << output << "' - " << strerror(errno));
+            _usage();
+        }
+        
+        struct stat  st;
+        if (stat(output, &st) == 0 && S_ISDIR(st.st_mode) == 0) {
+            LOG_ERR("invalid output location: '" << output << "' - is not a directory");
+            _usage();
         }
     }
 
@@ -198,6 +219,14 @@ int main(int argc, char* argv[])
         LOG_INFO("  " << std::setw(10) << i->size() << "  " << i->what());
     }
 
+    const mode_t  umsk = umask(0);
+    umask(umsk);
+
+    char  path[PATH_MAX+1];
+    char  rpath[PATH_MAX+1];
+    char*  ppath = NULL;
+
+    int  ret = 0;
     
     std::list<std::pair<unsigned, std::string> >  summaries;
     /* work through all the packing algos til we find the selected one .. if not
@@ -214,6 +243,19 @@ int main(int argc, char* argv[])
             LOG_INFO("---");
             LOG_INFO(p->name() << " #bins=" << bins.count() << "  #unhandled=" << unhandled.count() << " size=" << unhandled.size() << " (" << _humansizes(unhandled.size()) << ")");
 
+            if (output) {
+                sprintf(path, "%s/%s", output, p->name());
+                if (mkdir(path, 0777 & ~umsk) < 0) {
+                    LOG_ERR("unable to create output dir: " << path << " - " << strerror(errno));
+                    ppath = NULL;
+                    ret = 4;
+                }
+                else {
+                    ppath = path + strlen(path);
+                    *ppath++ = '/';
+                }
+            }
+
             summaries.push_back(std::make_pair(bins.count(), p->name()));
 
             if (!unhandled.empty()) {
@@ -222,13 +264,34 @@ int main(int argc, char* argv[])
                     LOG_WARN("  " << std::setw(1) << i->size() << "  " << i->what());
                 }
                 LOG_WARN("}");
+                ret = 3;
             }
 
             unsigned  i = 0;
-            for (Bins::const_iterator  b=bins.begin(); b!=bins.end(); ++b, ++i) {
+            for (Bins::const_iterator  b=bins.begin(); b!=bins.end(); ++b, ++i) 
+            {
                 LOG_INFO("  bin# " << i << "  size=" << b->size() << " (" << _humansizes(b->size()) << ") " << " remain=" << b->remain() << " (" << _humansizes(b->remain()) << ") " << " {");
-                for (Items::const_iterator j=b->items().begin(); j!=b->items().end(); ++j) {
+
+                for (Items::const_iterator j=b->items().begin(); j!=b->items().end(); ++j)
+                {
                     LOG_INFO("    \"" << j->what() << "\"");
+
+                    if (ppath) {
+                        if (realpath(j->what(), rpath) == NULL) {
+                            LOG_ERR("failed to resolve path: '" << j->what() << "' - " << strerror(errno) << " - will not generate output");
+                            ppath = NULL;
+                            ret = 5;
+                        }
+                        else
+                        {
+                            sprintf(ppath, "%s", j->what());
+                            if (symlink(rpath, path) < 0) {
+                                LOG_ERR("failed to create symlink: '" << rpath << "'  '" << path << "' - " << strerror(errno) << " - will not generate output");
+                                ppath = NULL;
+                                ret = 5;
+                            }
+                        }
+                    }
                 }
                 LOG_INFO("  }");
             }
@@ -245,5 +308,5 @@ int main(int argc, char* argv[])
         }
     }
 
-    return 0;
+    return ret;
 }
