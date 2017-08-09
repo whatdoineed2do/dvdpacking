@@ -272,6 +272,19 @@ int main(int argc, char* argv[])
             {
                 LOG_INFO("  bin# " << i << "  size=" << b->size() << " (" << _humansizes(b->size()) << ") " << " remain=" << b->remain() << " (" << _humansizes(b->remain()) << ") " << " {");
 
+                char*  bpath = ppath;
+                if (ppath) {
+                    sprintf(bpath, "bin%02d/", i);
+                    if (mkdir(path, 0777 & ~umsk) < 0) {
+                        LOG_ERR("unable to create output bin dir: " << path << " - " << strerror(errno));
+                        ppath = NULL;
+                        ret = 4;
+                    }
+                    else {
+                        bpath = path + strlen(path);
+                    }
+                }
+
                 for (Items::const_iterator j=b->items().begin(); j!=b->items().end(); ++j)
                 {
                     LOG_INFO("    \"" << j->what() << "\"");
@@ -284,7 +297,7 @@ int main(int argc, char* argv[])
                         }
                         else
                         {
-                            sprintf(ppath, "%s", j->what());
+                            sprintf(bpath, "%s", j->what());
                             if (symlink(rpath, path) < 0) {
                                 LOG_ERR("failed to create symlink: '" << rpath << "'  '" << path << "' - " << strerror(errno) << " - will not generate output");
                                 ppath = NULL;
