@@ -185,6 +185,51 @@ dvdpacking:   bin# 3  size=3661438150 (3.41GiB)  remain=1045881658 (997.4MiB)  {
 dvdpacking:     "2017-05"
 dvdpacking:   }
 ```
+### Generate output
+Using `-o` to specify an existing directory, the util can create directories for each considered packing alogirthm, where each created directory would contain symlinks to the files/directories under consideration:  the symlinks will refer to the underlying file/directory if symlnks were provided on the command line.
+```
+$ dvdpacking -p bestfit -c dvd -o /tmp/foo _pending 2017*[0-9]
+dvdpacking: ttl items=7  ttl size=18542384361 (17.27GiB)  lower bounds=4
+dvdpacking:   6119016216  _pending
+dvdpacking:   2102344092  2017-02
+dvdpacking:   1527565446  2017-03
+dvdpacking:   1181908894  2017-04
+dvdpacking:   3661438150  2017-05
+dvdpacking:   1876670069  2017-06
+dvdpacking:   2073441494  2017-07
+dvdpacking: ---
+dvdpacking: Best Fit #bins=4  #unhandled=1 size=6119016216 (5.699GiB)
+dvdpacking: [warn] unhandled items = {
+dvdpacking: [warn]   6119016216  _pending
+dvdpacking: [warn] }
+dvdpacking:   bin# 0  size=2073441494 (1.931GiB)  remain=2633878314 (2.453GiB)  {
+dvdpacking:     "2017-07"
+dvdpacking:   }
+dvdpacking:   bin# 1  size=3058578963 (2.849GiB)  remain=1648740845 (1.536GiB)  {
+dvdpacking:     "2017-04"
+dvdpacking:     "2017-06"
+dvdpacking:   }
+dvdpacking:   bin# 2  size=3629909538 (3.381GiB)  remain=1077410270 (1.003GiB)  {
+dvdpacking:     "2017-02"
+dvdpacking:     "2017-03"
+dvdpacking:   }
+dvdpacking:   bin# 3  size=3661438150 (3.41GiB)  remain=1045881658 (997.4MiB)  {
+dvdpacking:     "2017-05"
+dvdpacking:   }
+```
+This will create, under `/tmp/foo`, a directory for each of the bins represented
+```
+/tmp/foo/Best Fit/bin00/2017-07
+
+/tmp/foo/Best Fit/bin01/2017-04
+/tmp/foo/Best Fit/bin01/2017-06
+
+/tmp/foo/Best Fit/bin02/2017-02
+/tmp/foo/Best Fit/bin02/2017-03
+
+/tmp/foo/Best Fit/bin03/2017-05
+```
+The contents of the generated `bin` directories are symbolic links to the realpath of the input so the `bin` dirs or items contents can be moved to other locations for final `cdrecord` or `growisofs` commands.
 
 ## Further Enhancements
 If you wish to add other bin packing algorithms to this util, look at the abstract interface `Packer.h` - create a child and implement the `pack(..)` method and finally _register_ an instance of the object to the `bps` and `allbps` objects in `main()` and your algorithm will be automatically used.
