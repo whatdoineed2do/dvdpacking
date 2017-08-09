@@ -15,13 +15,13 @@ The user can also specify one of the inbuilt algorithms (via `-p`) to use if the
 
 Target bin *capacity*, via `-c`, is the only mandatory flag and can be specified in bytes or can use shorthands `dvd` or `cd`.
 
-A *reserve*, via `-r`, specified in bytes or as a percentage of the overal capacity, can be requested when performing the bin packing; such a reserve would be useful if you intend to add other documents or generate indexing (such as html index page generated from the data set) to the final output.
+A *reserve*, via `-r`, specified in bytes or as a percentage of the overal capacity, can be requested when performing the bin packing; such a reserve would be useful if you intend to add other documents or generate indexing (such as html index page generated from the data set https://github.com/whatdoineed2do/imgcat) to the final output.
 
 ## Example Usage
 #### Most likely usage
 This is my typical usage - allow the util to apply all inbuilt algorithms to determine least / most suitable bin packing suggestions.
 ```
-$ **dvdpacking -r 5% -c dvd _pending 2017*[0-9]**
+$ dvdpacking -r 5% -c dvd _pending 2017*[0-9]
 dvdpacking: ttl items=7  ttl size=18542384361 (17.27GiB)  lower bounds=5
 dvdpacking:   6119016216  _pending
 dvdpacking:   2102344092  2017-02
@@ -156,7 +156,7 @@ dvdpacking:     bins= 4  Worst Fit Descending
 #### Alternative usage
 No reserve is needed and we only want to consider the results of bestfit bin packing
 ```
-$ **dvdpacking -p bestfit -c dvd _pending 2017*[0-9]**
+$ dvdpacking -p bestfit -c dvd _pending 2017*[0-9]
 dvdpacking: ttl items=7  ttl size=18542384361 (17.27GiB)  lower bounds=4
 dvdpacking:   6119016216  _pending
 dvdpacking:   2102344092  2017-02
