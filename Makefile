@@ -16,17 +16,15 @@ LDFLAGS=$(DEBUGFLAGS)
 TARGETS=dvdpacking
 
 all:	objs $(TARGETS)
-objs:	Item.o Items.o Bins.o Bin.o Packer.o dvdpacking.o
+objs:	Item.o Bin.o Packer.o dvdpacking.o
 
 
 Item.o:		Item.cc Item.h
-Items.o:	Items.cc Items.h Item.h
 Bin.o:		Bin.cc Bin.h Item.h Items.h
-Bins.o:		Bins.cc Bins.h Bin.h
 Packer.o:	Packer.cc Packer.h Bin.h Bins.h Item.h Items.h
 dvdpacking.o:	dvdpacking.cc dvdpacking.h Packer.h Bins.h Bin.h Item.h Items.h
 
-dvdpacking:	dvdpacking.o Packer.o Bins.o Bin.o Items.o Item.o
+dvdpacking:	dvdpacking.o Packer.o Bin.o Item.o
 	$(CXX)  $^ $(LDFLAGS) -o $@
 
 clean:

@@ -3,10 +3,9 @@
 
 #pragma ident  "@(#)$Id$"
 
-#include <list>
 #include "Item.h"
 #include "Container.h"
 
-typedef Container<Item>  Items;
+using Items = Container<Item>;
 
 #endif

@@ -28,6 +28,9 @@ template<class T> class Container
         }
     }
 
+    Container(const Container&& rhs_) : _size(rhs_._size), _c(std::move(rhs_._c))
+    { }
+
 
     size_type  count() const  { return _c.size(); }
     size_type  size()  const  { return _size; }
@@ -36,6 +39,12 @@ template<class T> class Container
 
     void   push_back(const T& i_)  { _c.push_back(i_);  _size += i_.size(); }
     void  push_front(const T& i_)  { _c.push_front(i_); _size += i_.size(); }
+
+    void  emplace_back(T&& i_)
+    {
+        _size += i_.size();
+        _c.emplace_back(std::move(i_));
+    }
 
 
     iterator  begin()  { return _c.begin(); }

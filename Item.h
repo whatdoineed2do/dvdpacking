@@ -18,6 +18,12 @@ class Item
     Item(const char* what_)  throw (std::invalid_argument, std::underflow_error, std::out_of_range);
     Item(const Item&);
 
+    Item(const Item&& rhs_) : _what(std::move(rhs_._what)), _size(rhs_._size)
+    { }
+
+    void operator=(const Item&)  = delete;
+    void operator=(const Item&&) = delete;
+
 
     const char*  what() const  { return _what.c_str(); }
     const off_t  size() const  { return _size; }
@@ -26,11 +32,8 @@ class Item
 
 
   private:
-    void operator=(const Item&);
-
     const std::string  _what;
     off_t  _size; 
-
 
     off_t  _du(const char* where_) const  throw (std::invalid_argument);
 };

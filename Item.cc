@@ -15,7 +15,7 @@
 Item::Item(const char* what_)  throw (std::invalid_argument, std::underflow_error, std::out_of_range)
     : _what(what_), _size(0)
 {
-    if (what_ == NULL) {
+    if (what_ == nullptr) {
         throw std::invalid_argument("non null dir/file location required");
     }
 
@@ -53,7 +53,7 @@ off_t  Item::_du(const char* where_) const  throw (std::invalid_argument)
     LOG_DEBUG("examinging dir " << where_);
     off_t  size = 0;
     DIR*  d;
-    if ( (d = opendir(where_)) == NULL) {
+    if ( (d = opendir(where_)) == nullptr) {
         std::ostringstream  err;
         err << "failed to open '" << where_ << "' - " << strerror(errno);
         throw std::invalid_argument(err.str());
@@ -62,7 +62,7 @@ off_t  Item::_du(const char* where_) const  throw (std::invalid_argument)
     char  path[PATH_MAX];
 
     struct dirent*  dent = (struct dirent*)malloc(sizeof(struct dirent) + pathconf(where_, _PC_NAME_MAX));
-    struct dirent*  result = NULL;
+    struct dirent*  result = nullptr;
     while ( readdir_r(d, dent, &result) == 0 && result)
     {
         if (strcmp(result->d_name, ".") == 0 || strcmp(result->d_name, "..") == 0) {

@@ -7,6 +7,8 @@
 
 
 #include "Packer.h"
+#include <algorithm>
+
 
 Bins  PackFirstFit::pack(const Items& items_, off_t binsz_, Items& unhandled_)
 {
@@ -14,35 +16,35 @@ Bins  PackFirstFit::pack(const Items& items_, off_t binsz_, Items& unhandled_)
      */
 
     Bins  bins;
-    for (Items::const_iterator i=items_.begin(); i!=items_.end(); ++i)
-    {
-        if (i->size() > binsz_) {
-            unhandled_.push_back(*i);
-            continue;
+    std::all_of(items_.begin(), items_.end(), [&bins, &binsz_, &unhandled_](const Item& i) {
+        if (i.size() > binsz_) {
+            unhandled_.push_back(i);
+            return true;
         }
 
-        Bin*  b = NULL;
+        Bin*  b = nullptr;
         for (Bins::iterator j = bins.begin(); j!=bins.end(); ++j) 
         {
             if (j->closed() ) {
                 continue;
             }
 
-            if (j->remain() > i->size()) {
+            if (j->remain() > i.size()) {
                 b = &(*j);
                 break;
             }
         }
 
-        if (b == NULL) {
-            bins.push_back( Bin(binsz_) );
+        if (b == nullptr) {
+            bins.emplace_back( std::move(Bin(binsz_)) );
             b = &bins.back();
         }
 
-        b->add(*i);
-    }
+        b->add(i);
+        return true;
+    });
     
-    return bins;
+    return std::move(bins);
 }
 
 Bins  PackFirstFirtDesc::pack(const Items& items_, off_t binsz_, Items& unhandled_)
@@ -59,34 +61,34 @@ Bins  PackWorstFit::pack(const Items& items_, off_t binsz_, Items& unhandled_)
 
     Bins  bins;  // bin will be kept sorted, small -> largest
 
-    for (Items::const_iterator i=items_.begin(); i!=items_.end(); ++i)
-    {
-        if (i->size() > binsz_) {
-            unhandled_.push_back(*i);
-            continue;
+    std::all_of(items_.begin(), items_.end(), [&bins, &binsz_, &unhandled_](const Item& i) {
+        if (i.size() > binsz_) {
+            unhandled_.push_back(i);
+            return true;
         }
 
-        Bin*  b = NULL;
+        Bin*  b = nullptr;
         for (Bins::reverse_iterator j = bins.rbegin(); j!=bins.rend(); ++j) 
         {
             if (j->closed() ) {
                 continue;
             }
 
-            if (j->remain() > i->size()) {
+            if (j->remain() > i.size()) {
                 b = &(*j);
                 break;
             }
         }
 
-        if (b == NULL) {
-            bins.push_back( Bin(binsz_) );
+        if (b == nullptr) {
+            bins.emplace_back( std::move(Bin(binsz_)) );
             b = &bins.back();
         }
 
-        b->add(*i);
+        b->add(i);
         bins.sort();
-    }
+        return true;
+    });
     
     return bins;
 }
@@ -106,34 +108,34 @@ Bins  PackBestFit::pack(const Items& items_, off_t binsz_, Items& unhandled_)
 
     Bins  bins;  // bin will be kept sorted, small -> largest
 
-    for (Items::const_iterator i=items_.begin(); i!=items_.end(); ++i)
-    {
-        if (i->size() > binsz_) {
-            unhandled_.push_back(*i);
-            continue;
+    std::all_of(items_.begin(), items_.end(), [&bins, &binsz_, &unhandled_](const Item& i) {
+        if (i.size() > binsz_) {
+            unhandled_.push_back(i);
+            return true;
         }
 
-        Bin*  b = NULL;
+        Bin*  b = nullptr;
         for (Bins::iterator j = bins.begin(); j!=bins.end(); ++j) 
         {
             if (j->closed() ) {
                 continue;
             }
 
-            if (j->remain() > i->size()) {
+            if (j->remain() > i.size()) {
                 b = &(*j);
                 break;
             }
         }
 
-        if (b == NULL) {
-            bins.push_back( Bin(binsz_) );
+        if (b == nullptr) {
+            bins.emplace_back( std::move(Bin(binsz_)) );
             b = &bins.back();
         }
 
-        b->add(*i);
+        b->add(i);
         bins.sort();
-    }
+        return true;
+    });
     
     return bins;
 }

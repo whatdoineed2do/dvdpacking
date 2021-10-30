@@ -15,6 +15,12 @@ class Bin
   public:
     Bin(const off_t  max_) : _max(max_), _remain(_max), _closed(false) { }
     Bin(const Bin& rhs_)   : _max(rhs_._max), _remain(rhs_._remain), _items(rhs_._items), _closed(rhs_._closed) { }
+    //Bin(const Bin&) = delete;
+
+    Bin(const Bin&& rhs_) : _max(rhs_._max), _remain(rhs_._remain), _items(std::move(rhs_._items)), _closed(rhs_._closed) { }
+
+    void operator=(const Bin&)  = delete;
+    void operator=(const Bin&&) = delete;
 
     off_t  max() const { return _max; }
     off_t  remain() const { return _remain; }
@@ -34,8 +40,6 @@ class Bin
 
 
   private:
-    void operator=(const Bin&);
-
     const off_t  _max;
     off_t        _remain;
 
