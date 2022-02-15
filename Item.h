@@ -15,7 +15,7 @@
 class Item
 {
   public:
-    Item(const char* what_)  throw (std::invalid_argument, std::underflow_error, std::out_of_range);
+    Item(const char* what_);
     Item(const Item&);
 
     Item(const Item&& rhs_) : _what(std::move(rhs_._what)), _size(rhs_._size)
@@ -35,7 +35,7 @@ class Item
     const std::string  _what;
     off_t  _size; 
 
-    off_t  _du(const char* where_) const  throw (std::invalid_argument);
+    off_t  _du(const char* where_) const;
 };
 
 #endif

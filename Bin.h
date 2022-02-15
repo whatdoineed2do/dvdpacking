@@ -26,9 +26,9 @@ class Bin
     off_t  remain() const { return _remain; }
     off_t  size()  const  { return _max - _remain; }
 
-    Bin&  add(const Item&)  throw (std::underflow_error,  /* adding when not sufficient space */ 
-                                   std::overflow_error    /* adding when closed*/
-                                  );
+    Bin&  add(const Item&); // throw (std::underflow_error,  /* adding when not sufficient space */ 
+                            //       std::overflow_error    /* adding when closed*/
+                            //      );
 
     bool  closed() const { return _closed; }
     void  close() { _closed = true; }

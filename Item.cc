@@ -12,7 +12,7 @@
 #include <sstream>
 
 
-Item::Item(const char* what_)  throw (std::invalid_argument, std::underflow_error, std::out_of_range)
+Item::Item(const char* what_)
     : _what(what_), _size(0)
 {
     if (what_ == nullptr) {
@@ -48,7 +48,7 @@ Item::Item(const Item& rhs_)
 { }
 
 
-off_t  Item::_du(const char* where_) const  throw (std::invalid_argument)
+off_t  Item::_du(const char* where_) const
 {
     LOG_DEBUG("examinging dir " << where_);
     off_t  size = 0;

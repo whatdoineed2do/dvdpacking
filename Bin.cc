@@ -12,7 +12,7 @@
 #include <sstream>
 
 
-Bin& Bin::add(const Item& i_)  throw (std::underflow_error, std::overflow_error)
+Bin& Bin::add(const Item& i_)
 {
     if (_closed) {
         throw std::overflow_error("bin closed");
