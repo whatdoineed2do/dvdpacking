@@ -1,0 +1,6 @@
+To build and install
+```
+autoreconf --install
+autoconf
+./configure && make
+```
