@@ -3,13 +3,17 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <dirent.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 
 #include <sstream>
+#if HAVE_CXX17 == 1
+#include <filesystem>
+#else
+#include <dirent.h>
+#endif
 
 
 Item::Item(const char* what_)
@@ -52,6 +56,32 @@ off_t  Item::_du(const char* where_) const
 {
     LOG_DEBUG("examinging dir " << where_);
     off_t  size = 0;
+
+ #if HAVE_CXX17 == 1
+    if (!std::filesystem::exists(where_)) {
+        std::ostringstream  err;
+        err << "failed to open '" << where_ << "' - " << strerror(errno);
+        throw std::invalid_argument(err.str());
+    }
+
+    for (const auto& de : std::filesystem::directory_iterator{where_,
+                                                              std::filesystem::directory_options::follow_directory_symlink}
+	)
+    {
+	switch (auto  t = de.symlink_status().type()) {
+	    case std::filesystem::file_type::directory:
+		size += _du(de.path().c_str());
+		break;
+
+	    case std::filesystem::file_type::regular:
+		size += de.file_size();
+		break;
+
+	    default:
+	        LOG_ERR(de.path().c_str() << " is not file/dir ????");
+	}
+    }
+#else
     DIR*  d;
     if ( (d = opendir(where_)) == nullptr) {
         std::ostringstream  err;
@@ -97,6 +127,7 @@ off_t  Item::_du(const char* where_) const
     }
     free(dent);
     closedir(d);
+#endif
 
     LOG_DEBUG(where_ << " = " << size);
     return size;
