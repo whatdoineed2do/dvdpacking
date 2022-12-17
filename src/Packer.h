@@ -10,7 +10,13 @@
 class Packer
 {
   public:
-    virtual ~Packer() { }
+    virtual ~Packer() = default;
+
+    Packer(const Packer&)  = delete;
+    Packer(const Packer&&) = delete;
+
+    void operator=(const Packer&)  = delete;
+    void operator=(const Packer&&) = delete;
 
     /* it may be the case that some items are too big for the bin size so
      * need to add such items to the 'unhandled' item
@@ -23,10 +29,6 @@ class Packer
     Packer(const char* name_) : _name(name_) { }
 
     const char*  _name;
-
-  private:
-    Packer(const Packer&);
-    void operator=(const Packer&);
 };
 
 
@@ -34,7 +36,7 @@ class PackFirstFit : public Packer
 {
   public:
     PackFirstFit() : Packer("First Fit")  { }
-    virtual ~PackFirstFit() { }
+    virtual ~PackFirstFit() = default;
 
     virtual Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
 
@@ -45,7 +47,7 @@ class PackFirstFit : public Packer
 struct PackFirstFirtDesc : public PackFirstFit
 {
     PackFirstFirtDesc() : PackFirstFit("First Fit Descending")  { }
-    ~PackFirstFirtDesc() { }
+    ~PackFirstFirtDesc() = default;
     Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
 };
 
@@ -53,7 +55,7 @@ class PackWorstFit : public Packer
 {
   public:
     PackWorstFit() : Packer("Worst Fit")  { }
-    virtual ~PackWorstFit() { }
+    virtual ~PackWorstFit() = default;
     virtual Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
 
   protected:
@@ -63,7 +65,7 @@ class PackWorstFit : public Packer
 struct PackWorstFitDesc : public PackWorstFit
 {
     PackWorstFitDesc() : PackWorstFit("Worst Fit Descending")  { }
-    ~PackWorstFitDesc() { }
+    ~PackWorstFitDesc() = default;
     Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
 };
 
@@ -72,7 +74,7 @@ class PackBestFit : public Packer
 {
   public:
     PackBestFit() : Packer("Best Fit")  { }
-    virtual ~PackBestFit() { }
+    virtual ~PackBestFit() = default;
     virtual Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
 
   protected:
@@ -82,7 +84,7 @@ class PackBestFit : public Packer
 struct PackBestFitDesc : public PackBestFit
 {
     PackBestFitDesc() : PackBestFit("Best Fit Descending")  { }
-    ~PackBestFitDesc() { }
+    ~PackBestFitDesc() = default;
     Bins  pack(const Items&, off_t binsz_, Items& unhandled_);
 };
 

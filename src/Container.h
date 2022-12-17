@@ -31,6 +31,8 @@ template<class T> class Container
     Container(const Container&& rhs_) : _size(rhs_._size), _c(std::move(rhs_._c))
     { }
 
+    void operator=(const Container&)  = delete;
+    void operator=(const Container&&) = delete;
 
     size_type  count() const  { return _c.size(); }
     size_type  size()  const  { return _size; }
@@ -73,7 +75,6 @@ template<class T> class Container
 
 
   private:
-    void operator=(const Container&);
 
     value_type  _c;
     off_t  _size;
