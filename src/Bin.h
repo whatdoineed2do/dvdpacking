@@ -35,7 +35,7 @@ class Bin
 
     const Items&  items() const  { return _items; }
 
-    bool  operator<(const Bin& rhs_)
+    bool  operator<(const Bin& rhs_) const
     { return size() < rhs_.size(); }
 
 

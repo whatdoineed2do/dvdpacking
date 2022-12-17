@@ -28,7 +28,7 @@ class Item
     const char*  what() const  { return _what.c_str(); }
     const off_t  size() const  { return _size; }
 
-    bool  operator<(const Item& rhs_)  { return _size < rhs_._size; }
+    bool  operator<(const Item& rhs_) const  { return _size < rhs_._size; }
 
 
   private:
