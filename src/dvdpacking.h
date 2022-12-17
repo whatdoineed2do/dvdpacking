@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include "../config.h"
 
 class Bin;
 class Item;
