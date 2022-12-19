@@ -11,6 +11,7 @@
 #include <sstream>
 #if HAVE_CXX17 == 1
 #include <filesystem>
+#include <numeric>
 #else
 #include <dirent.h>
 #endif
@@ -55,7 +56,7 @@ Item::Item(const Item& rhs_)
 off_t  Item::_du(const char* where_) const
 {
     LOG_DEBUG("examinging dir " << where_);
-    off_t  size = 0;
+    long unsigned  size = 0;
 
  #if HAVE_CXX17 == 1
     if (!std::filesystem::exists(where_)) {
@@ -64,17 +65,33 @@ off_t  Item::_du(const char* where_) const
         throw std::invalid_argument(err.str());
     }
 
-    for (const auto& de : std::filesystem::directory_iterator{where_,
-                                                              std::filesystem::directory_options::follow_directory_symlink}
-	)
-    {
-	if (de.symlink_status().type() == std::filesystem::file_type::directory) {
-	    size += _du(de.path().c_str());
-	}
-	else {
-	    size += de.file_size();
-	}
+    struct stat  st = { 0 };
+
+    const auto&  de = std::filesystem::directory_iterator{ where_, std::filesystem::directory_options::follow_directory_symlink };
+
+    unsigned  dircount = 0;
+    if (std::filesystem::is_directory(where_)) {
+        dircount = 1;
+	stat(where_, &st);
+	// dirent has a size but its size depends on the filesystem; we do this to keep it in sync with "du -sb ..."
     }
+    return std::accumulate(std::filesystem::begin(de), std::filesystem::end(de), 0lu, [this](auto x_, auto y_) {
+	switch (auto  t = y_.symlink_status().type()) {
+	    case std::filesystem::file_type::directory:
+		LOG_DEBUG(y_.path() << " dir");
+		return x_ + _du(y_.path().c_str());
+		break;
+
+	    case std::filesystem::file_type::regular:
+		LOG_DEBUG(y_.path() << " " << y_.file_size());
+		return x_ + y_.file_size();
+		break;
+
+	    default:
+	        LOG_ERR(y_.path().c_str() << " is not file/dir ????");
+		return x_;
+	}
+    }) + dircount * st.st_size;
 #else
     DIR*  d;
     if ( (d = opendir(where_)) == nullptr) {
@@ -106,11 +123,13 @@ off_t  Item::_du(const char* where_) const
 
         try
         {
-            LOG_DEBUG("mode=" << st.st_mode << " ino=" << st.st_ino << " size=" << st.st_size);
-            size += st.st_size;
+            LOG_DEBUG("mode=" << st.st_mode << " ino=" << st.st_ino << " size=" << st.st_size << " '" << path << "'");
             if (st.st_mode & S_IFDIR) {
                 size += _du(path);
             }
+	    else {
+		size += st.st_size;
+	    }
         }
         catch (...)
         {
