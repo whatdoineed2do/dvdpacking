@@ -88,7 +88,7 @@ off_t  Item::_du(const char* where_) const
 		break;
 
 	    case std::filesystem::file_type::symlink:
-	        LOG_ERR(y_.path().c_str() << " is symlink");
+	        LOG_DEBUG(y_.path().c_str() << " is symlink");
 		return x_ + _du(std::filesystem::read_symlink(y_.path()).c_str());
 
 	    default:
