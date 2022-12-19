@@ -67,7 +67,7 @@ off_t  Item::_du(const char* where_) const
 
     struct stat  st = { 0 };
 
-    const auto&  de = std::filesystem::directory_iterator{ where_, std::filesystem::directory_options::follow_directory_symlink };
+    const auto  de = std::filesystem::directory_iterator{ where_, std::filesystem::directory_options::follow_directory_symlink };
 
     unsigned  dircount = 0;
     if (std::filesystem::is_directory(where_)) {
