@@ -87,8 +87,12 @@ off_t  Item::_du(const char* where_) const
 		return x_ + y_.file_size();
 		break;
 
+	    case std::filesystem::file_type::symlink:
+	        LOG_ERR(y_.path().c_str() << " is symlink");
+		return x_ + _du(std::filesystem::read_symlink(y_.path()).c_str());
+
 	    default:
-	        LOG_ERR(y_.path().c_str() << " is not file/dir ????");
+	        LOG_WARN(y_.path().c_str() << " is not file/dir/symlink, ignored");
 		return x_;
 	}
     }) + dircount * st.st_size;
