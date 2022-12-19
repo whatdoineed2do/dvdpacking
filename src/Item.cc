@@ -101,6 +101,11 @@ off_t  Item::_du(const char* where_) const
     }
 
     char  path[PATH_MAX];
+    struct stat  st = { 0 };
+    stat(where_, &st);
+    if (st.st_mode & S_IFDIR) {
+	size += st.st_size;
+    }
 
     struct dirent*  dent = (struct dirent*)malloc(sizeof(struct dirent) + pathconf(where_, _PC_NAME_MAX));
     struct dirent*  result = nullptr;
@@ -110,7 +115,6 @@ off_t  Item::_du(const char* where_) const
             continue;
         }
 
-        struct stat  st;
         sprintf(path, "%s/%s", where_, result->d_name);
         if (stat(path, &st) < 0)
         {
