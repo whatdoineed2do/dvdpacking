@@ -13,6 +13,14 @@ AC_HEADER_STDC
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
+
+AC_ARG_ENABLE([17-readdir],
+    AS_HELP_STRING([--enable-17-readdir], [Enable std 17 filesystem (no readdir(2))]),
+)
+AS_IF([test "x$enable_17_readdir" = "xyes" && test $HAVE_CXX17 = 1], [
+    AC_DEFINE(CXX17_READDIR,1,[readdir])
+])
+
 AC_ARG_ENABLE([debug],
 	[AS_HELP_STRING([--enable-debug],
 	[enable debug (default is no)])],

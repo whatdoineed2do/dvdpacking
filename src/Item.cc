@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include <sstream>
-#if HAVE_CXX17 == 1
+#if HAVE_CXX17 == 1 && defined(CXX17_READDIR)
 #include <filesystem>
 #include <numeric>
 #else
@@ -58,7 +58,7 @@ off_t  Item::_du(const char* where_) const
     LOG_DEBUG("examinging dir " << where_);
     long unsigned  size = 0;
 
- #if HAVE_CXX17 == 1
+ #if HAVE_CXX17 == 1 && defined(CXX17_READDIR)
     if (!std::filesystem::exists(where_)) {
         std::ostringstream  err;
         err << "failed to open '" << where_ << "' - " << strerror(errno);
