@@ -13,17 +13,17 @@ AC_HEADER_STDC
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 
-AC_ARG_ENABLE([debug-code],
+AC_ARG_ENABLE([debug],
 	[AS_HELP_STRING([--enable-debug],
 	[enable debug (default is no)])],
 	[no_debug=false],
 	[no_debug=true])
 if test "$no_debug" = true; then
         building_debug=no
-        AC_DEFINE(NDEBUG,1,[debug code])
+        AC_DEFINE(NDEBUG,1,[debug])
 else
         building_debug=yes
-        AC_DEFINE(DEBUG,1,[debug code])
+        AC_DEFINE(DEBUG,1,[debug])
 fi
 
 
