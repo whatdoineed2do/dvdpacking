@@ -10,12 +10,12 @@
 template<class T> class Container
 {
   public:
-    typedef std::list<T>  value_type;
-    typedef typename value_type::size_type  size_type;
-    typedef typename value_type::iterator  iterator;
-    typedef typename value_type::const_iterator  const_iterator;
-    typedef typename value_type::reverse_iterator  reverse_iterator;
-    typedef typename value_type::const_reverse_iterator  const_reverse_iterator;
+    using value_type             = std::list<T>;
+    using size_type              = typename value_type::size_type;
+    using iterator               = typename value_type::iterator;
+    using const_iterator         = typename value_type::const_iterator;
+    using reverse_iterator       = typename value_type::reverse_iterator;
+    using const_reverse_iterator = typename value_type::const_reverse_iterator;
 
 
     Container() : _size(0) { }
