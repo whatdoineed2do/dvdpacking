@@ -9,9 +9,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX([14], [noext], [mandatory])
 AX_CXX_COMPILE_STDCXX([17], [noext], [optional])
-AC_HEADER_STDC
 AC_PROG_INSTALL
-AC_PROG_LIBTOOL
 
 
 AC_ARG_ENABLE([17-readdir],
